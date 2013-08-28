@@ -5,29 +5,29 @@
 module Main where
 
 import System.IO
+import Data.Maybe (fromJust)
 
 data Cell = ALIVE | DEAD deriving (Show, Eq)
 type World = [[Cell]]
 type Coor = (Int, Int)
 
-readWorld :: String -> World
-readWorld = map readRow . lines
-    where readRow = map readCell
+readWorld :: String -> Maybe World
+readWorld =  (mapM . mapM) readCell . lines
 
 showWorld :: World -> String
-showWorld = unlines . map showRow
-    where showRow = map showCell
+showWorld = unlines . (map . map) showCell
 
 showCell :: Cell -> Char
 showCell ALIVE = 'O'
 showCell DEAD  = '.'
 
-readCell :: Char -> Cell
-readCell 'O' = ALIVE
-readCell '.' = DEAD
+readCell :: Char -> Maybe Cell
+readCell 'O' = Just ALIVE
+readCell '.' = Just DEAD
+readCell  _  = Nothing
 
 neighbors :: World -> Coor -> Int
-neighbors world (r, c) = length $ filter (isAlive world) (map (adjCorr worldHeight worldWidth) nCoors)
+neighbors world (r, c) = length $ filter (isAlive world) adjustedCoors
     where nCoors = [(r-1, c-1),
                     (r-1, c),
                     (r-1, c+1),
@@ -37,11 +37,12 @@ neighbors world (r, c) = length $ filter (isAlive world) (map (adjCorr worldHeig
                     (r+1, c),
                     (r+1, c+1)
                    ]
+          adjustedCoors = (map (adjustCoor worldHeight worldWidth) nCoors)
           worldWidth = length (world !! 0)
           worldHeight = length world
 
-adjCorr :: Int -> Int -> Coor -> Coor
-adjCorr h w (r,c) = (wrap h r, wrap w c)
+adjustCoor :: Int -> Int -> Coor -> Coor
+adjustCoor h w (r,c) = (wrap h r, wrap w c)
 
 wrap :: Int -> Int -> Int
 wrap max val
@@ -77,4 +78,4 @@ reshape r c l  = (take c l):reshape (r-1) c (drop c l)
 
 main :: IO ()
 main = do world <- fmap readWorld (hGetContents stdin)
-          putStr . showWorld . tick $ world
+          putStr . showWorld . tick $ fromJust world
