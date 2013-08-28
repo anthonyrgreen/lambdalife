@@ -59,14 +59,6 @@ tick world = reshape worldHeight worldWidth flatWorld
           allCoors    = [(x,y) | x <- [0..(worldHeight-1)], y <- [0..(worldWidth-1)]]
           flatWorld   = map tickCell $ zip (flatten world) (map (neighbors world) allCoors)
 
-flatten :: [[a]] -> [a]
-flatten [] = []
-flatten (xs:xss) = xs ++ flatten xss
-
-reshape :: Int -> Int -> [a] -> [[a]]
-reshape _ _ [] = []
-reshape r c l  = (take c l):reshape (r-1) c (drop c l)
-
 tickCell :: (Cell, Int) -> Cell
 tickCell (ALIVE, neighborCount)
     | or [neighborCount > 3, neighborCount < 2] = DEAD
@@ -74,6 +66,14 @@ tickCell (ALIVE, neighborCount)
 tickCell (DEAD, neighborCount)
     | neighborCount == 3 = ALIVE
     | otherwise          = DEAD
+
+flatten :: [[a]] -> [a]
+flatten [] = []
+flatten (xs:xss) = xs ++ flatten xss
+
+reshape :: Int -> Int -> [a] -> [[a]]
+reshape _ _ [] = []
+reshape r c l  = (take c l):reshape (r-1) c (drop c l)
 
 main :: IO ()
 main = do world <- fmap readWorld (hGetContents stdin)
