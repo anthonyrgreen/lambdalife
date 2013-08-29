@@ -2,12 +2,12 @@ UNIX Life (Haskell Redux)
 =========================
 
 This is a literate Haskell program which can be used to play 
-the Game of Life the UNIX way. Specifically, this program reads
+the Game of Life _a la_ UNIX. Specifically, this program reads
 a "world" of '.'s (dead cells) and 'O's (live cells) from stdin
 and outputs the resultant world to stdout.
 
 > module Main where
-
+>
 > import System.IO
 > import Data.Maybe (fromJust)
 
@@ -38,12 +38,11 @@ type `Maybe [[Cell]]` which is equivalent to `Maybe World`
 > showCell DEAD  = '.'
 
 This function's operation is very similar to the one above 
-except that we use `map` instead of  
+except that we use `map` instead of `mapM` since our `World` input
+is not a Monad like `Maybe Cell` above.
 
 > showWorld :: World -> String
 > showWorld = unlines . (map . map) showCell
-
-Using these neighbor rules creates the game of life on a torus
 
 > neighbors :: World -> Coor -> Int
 > neighbors world (r, c) = length $ filter (isAlive world) adjustedCoors
@@ -60,9 +59,12 @@ Using these neighbor rules creates the game of life on a torus
 >           worldWidth = length (world !! 0)
 >           worldHeight = length world
 
+The `adjustCoor` wraps the world coordinates such that the game is 
+played on a torus
+
 > adjustCoor :: Int -> Int -> Coor -> Coor
 > adjustCoor h w (r,c) = (wrap h r, wrap w c)
-
+>
 > wrap :: Int -> Int -> Int
 > wrap max val
 >     | val == (-1)   = max-1
@@ -71,6 +73,10 @@ Using these neighbor rules creates the game of life on a torus
 
 > isAlive :: World -> Coor -> Bool
 > isAlive world (x, y) = ALIVE == (world !! x !! y)
+
+A tick is a single time step in the game of life and logically, this 
+tick function takes as input a world at time _t_ and outputs the world at time
+_t+1_
 
 > tick :: World -> World
 > tick world = reshape worldHeight worldWidth flatWorld 
@@ -87,10 +93,13 @@ Using these neighbor rules creates the game of life on a torus
 >     | neighborCount == 3 = ALIVE
 >     | otherwise          = DEAD
 
+simple functions to transform a matrix (list of lists) to a single
+flat list and vice-versa
+
 > flatten :: [[a]] -> [a]
 > flatten [] = []
 > flatten (xs:xss) = xs ++ flatten xss
-
+>
 > reshape :: Int -> Int -> [a] -> [[a]]
 > reshape _ _ [] = []
 > reshape r c l  = (take c l):reshape (r-1) c (drop c l)
