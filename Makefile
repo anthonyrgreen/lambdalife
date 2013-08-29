@@ -1,2 +1,2 @@
-all: life.hs
-	ghc --make life.hs -o life
+all: life.lhs
+	ghc --make life.lhs -o life
