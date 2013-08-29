@@ -7,7 +7,7 @@ a "world" of '.'s (dead cells) and 'O's (live cells) from stdin
 and outputs the resultant world to stdout.
 
 > module Main where
->
+
 > import System.IO
 > import Data.Maybe (fromJust)
 
@@ -99,7 +99,7 @@ flat list and vice-versa
 > flatten :: [[a]] -> [a]
 > flatten [] = []
 > flatten (xs:xss) = xs ++ flatten xss
->
+
 > reshape :: Int -> Int -> [a] -> [[a]]
 > reshape _ _ [] = []
 > reshape r c l  = (take c l):reshape (r-1) c (drop c l)
