@@ -2,7 +2,7 @@ UNIX Life (Haskell Redux)
 =========================
 
 This is a literate Haskell program which can be used to play 
-the Game of Life _a la_ UNIX. Specifically, this program reads
+the Game of Life _à la_ UNIX. Specifically, this program reads
 a "world" of '.'s (dead cells) and 'O's (live cells) from stdin
 and outputs the resultant world to stdout.
 
@@ -22,9 +22,9 @@ To model the game of life, we create a matrix of cells
 > readCell '.' = Just DEAD
 > readCell  _  = Nothing
 
-Here, we map readCell onto every char element of the text input.
-Calling `lines stdin` produces a value of type [[Char]],
-and (mapM . mapM) is of the type 
+Here, we map `readCell` onto every char element of the text input.
+Calling `lines stdin` produces a value of type `[[Char]]`,
+and `(mapM . mapM)` is of the type 
 `Monad m => (a -> m b) -> [[a]] -> m [[b]]`;
 above we that readCell maps from `Char` to `Maybe Cell`, which
 implies that `(mapM . mapM) readCell` will produce a value of 
@@ -59,7 +59,7 @@ is not a Monad like `Maybe Cell` above.
 >           worldWidth = length (world !! 0)
 >           worldHeight = length world
 
-The `adjustCoor` wraps the world coordinates such that the game is 
+The `adjustCoor` function wraps the world coordinates such that the game is 
 played on a torus
 
 > adjustCoor :: Int -> Int -> Coor -> Coor
@@ -70,6 +70,8 @@ played on a torus
 >     | val == (-1)   = max-1
 >     | val == max    = 0
 >     | otherwise     = val 
+
+Checks if a cell at `(x,y)` is alive
 
 > isAlive :: World -> Coor -> Bool
 > isAlive world (x, y) = ALIVE == (world !! x !! y)
@@ -84,6 +86,14 @@ _t+1_
 >           worldHeight = length world
 >           allCoors    = [(x,y) | x <- [0..(worldHeight-1)], y <- [0..(worldWidth-1)]]
 >           flatWorld   = map tickCell $ zip (flatten world) (map (neighbors world) allCoors)
+
+
+each cell evolves according to the following rules
+
+- Any live cell with fewer than two live neighbors dies, as if caused by under-population.
+- Any live cell with two or three live neighbors lives on to the next generation.
+- Any live cell with more than three live neighbors dies, as if by overcrowding.
+- Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
 
 > tickCell :: (Cell, Int) -> Cell
 > tickCell (ALIVE, neighborCount)
