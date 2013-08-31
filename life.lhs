@@ -19,15 +19,15 @@ To model the game of life, we create a matrix of cells
 > readCell :: Char -> Maybe Cell
 > readCell 'O' = Just ALIVE
 > readCell '.' = Just DEAD
-> readCell  c  = fail (show c ++ errormsg)
+> readCell  c  = error (show c ++ errormsg)
 >       where errormsg = " is not a valid cell character, must be '0' or '.'"
 
 Here, we map `readCell` onto every char element of the text input.
 Calling `lines stdin` produces a value of type `[[Char]]`,
-and `(mapM . mapM)` is of the type 
+and `(mapM . mapM)` is of the type
 `Monad m => (a -> m b) -> [[a]] -> m [[b]]`;
-above we that readCell maps from `Char` to `Maybe Cell`, which
-implies that `(mapM . mapM) readCell` will produce a value of 
+above we see that readCell maps from `Char` to `Maybe Cell`, which
+implies that `(mapM . mapM) readCell` will produce a value of
 type `Maybe [[Cell]]` which is equivalent to `Maybe World`
 
 > readWorld :: String -> Maybe World
@@ -64,12 +64,10 @@ played on a torus
 
 > adjustCoor :: Int -> Int -> Coor -> Coor
 > adjustCoor h w (r,c) = (wrap h r, wrap w c)
->
-> wrap :: Int -> Int -> Int
-> wrap maxcoor val
->     | val == (-1)     = maxcoor-1
->     | val == maxcoor  = 0
->     | otherwise       = val 
+>   where wrap mc v
+>            | v == -1   = mc-1
+>            | v == mc   = 0
+>            | otherwise = v
 
 Checks if a cell at `(x,y)` is alive
 
@@ -102,14 +100,14 @@ each cell evolves according to the following rules
 >     | neighborCount == 3 = ALIVE
 >     | otherwise          = DEAD
 
-simple functions to transform a matrix (list of lists) to a single
-flat list and vice-versa
+simple function to take a list and transform it into a matrix
+(2D list) with `c` columns and `r` rows
 
 > reshape :: Int -> Int -> [a] -> [[a]]
 > reshape _ _ [] = []
 > reshape r c l  = take c l : reshape (r-1) c (drop c l)
 
-getContents lazily reads all input from a given buffer
+getContents lazily reads all input from stdin
 
 > main :: IO ()
 > main = do world <- fmap readWorld getContents
